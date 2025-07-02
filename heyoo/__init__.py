@@ -621,6 +621,51 @@ class WhatsApp(object):
             logging.info(f"Error marking message {message_id} as read: {response.status_code}")
             logging.error(f"Response: {response.text}")
             return response.json()
+        
+    async def show_typing_indicator(self, message_id: str) -> Dict[Any, Any]:
+        """
+        Asynchronously shows a typing indicator for a message using the WhatsApp Cloud API.
+
+        Args:
+            message_id (str): ID of the message to show the typing indicator for.
+
+        Returns:
+            Dict[Any, Any]: Response from the API.
+
+        Example:
+            >>> from whatsapp import WhatsApp
+            >>> whatsapp = WhatsApp(token, phone_number_id)
+            >>> await whatsapp.show_typing_indicator("message_id")
+        """
+        headers = {
+            "Authorization": f"Bearer {self.token}",
+            "Content-Type": "application/json",
+        }
+
+        json_data = {
+            "messaging_product": "whatsapp",
+            "status": "read",
+            "message_id": message_id,
+            "typing_indicator": {
+                "type": "text"
+            }
+        }
+
+        logging.info(f"Showing typing indicator for message {message_id}")
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{self.v15_base_url}/{self.phone_number_id}/messages",
+                headers=headers,
+                json=json_data,
+            )
+
+        if response.status_code == 200:
+            logging.info(f"Typing indicator shown for message {message_id}")
+            return response.json()
+        else:
+            logging.info(f"Error showing typing indicator for message {message_id}: {response.status_code}")
+            logging.error(f"Response: {response.text}")
+            return response.json()
 
     def create_button(self, button: Dict[Any, Any]) -> Dict[Any, Any]:
         """
